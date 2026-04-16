@@ -1,0 +1,49 @@
+@model HongTraStore.Models.SanPham
+@{ViewData["Title"] = "Sửa Sản Phẩm";}
+
+<div class="container mt-4" style="max-width:600px">
+    <h2>✏️ Chỉnh Sửa Sản Phẩm</h2>
+    <hr/>
+
+    <form method="post" action="/SanPham/Edit">
+        @* Bắt buộc phải có Id để biết sửa sản phẩm nào *@
+        <input asp-for="Id" type="hidden"/>
+
+        <div class="mb-3">
+            <label class="form-label">Tên Sản Phẩm</label>
+            <input asp-for="TenSanPham" class="form-control" required/>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Danh Mục</label>
+            <select asp-for="DanhMuc" class="form-control">
+                <option value="Hồng Trà">Hồng Trà</option>
+                <option value="Đặc Biệt">Đặc Biệt</option>
+                <option value="Trái Cây">Trái Cây</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Giá Bán (VNĐ)</label>
+            <input asp-for="Gia" class="form-control" type="number"/>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Số Lượng Tồn Kho</label>
+            <input asp-for="SoLuongTon" class="form-control" type="number"/>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Mô Tả</label>
+            <textarea asp-for="MoTa" class="form-control" rows="3"></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Hình Ảnh</label>
+            <input asp-for="HinhAnh" class="form-control"/>
+        </div>
+
+        <button type="submit" class="btn btn-primary">💾 Cập Nhật</button>
+        <a href="/SanPham" class="btn btn-secondary ms-2">← Quay Lại</a>
+    </form>
+</div>

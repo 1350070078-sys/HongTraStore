@@ -1,0 +1,258 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Hồng Trà DQT</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <style>
+        .navbar {
+            background: linear-gradient(135deg, #2d1a0e, #5a3728) !important;
+        }
+        .navbar-brand {
+            color: #f0dba0 !important;
+            font-weight: 700;
+            font-size: 1.3rem;
+        }
+        .nav-link {
+            color: #e8d5c8 !important;
+            font-weight: 500;
+        }
+        .nav-link:hover {
+            color: #f0dba0 !important;
+        }
+        .dropdown-menu {
+            background: #3d2515;
+            border: 1px solid #5a3728;
+            border-radius: 12px;
+            padding: .5rem;
+        }
+        .dropdown-item {
+            color: #e8d5c8 !important;
+            border-radius: 8px;
+            padding: .5rem .9rem;
+            font-size: .9rem;
+        }
+        .dropdown-item:hover {
+            background: rgba(192,57,43,.3) !important;
+            color: #f0dba0 !important;
+        }
+        .dropdown-divider {
+            border-color: #5a3728;
+        }
+        footer {
+            background: #2d1a0e;
+            color: #c8a898;
+            padding: 1rem 0;
+            margin-top: 3rem;
+        }
+        footer a {
+            color: #f0dba0;
+        }
+        </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-dark mb-3">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="/">🍵 Hồng Trà DQT</a>
+                <button class="navbar-toggler" type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target=".navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                @{
+                    var vaiTro = Context.Session.GetString("VaiTro");
+                    var userName = Context.Session.GetString("UserName");
+                    var gioJson = Context.Session.GetString("GioHang");
+                    int soMonGio = 0;
+                    if (!string.IsNullOrEmpty(gioJson))
+                    {
+                        var gioList = System.Text.Json.JsonSerializer
+                            .Deserialize<List<HongTraStore.Models.GioHangItem>>(gioJson);
+                        soMonGio = gioList?.Count ?? 0;
+                    }
+                }
+
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+
+                    @* ── MENU TRÁI ── *@
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/">🏠 Trang Chủ</a>
+                        </li>
+
+                        @if (vaiTro == "Admin")
+                        {
+                            @* Admin: Menu dropdown chứa SP *@
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#"
+                                   data-bs-toggle="dropdown">
+                                    🍵 Menu
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a class="dropdown-item" href="/SanPham">
+                                            📋 Danh Sách Sản Phẩm
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="/SanPham/Create">
+                                            ➕ Thêm Sản Phẩm
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                            @* Admin: Quản Lý Đơn hiển thị riêng *@
+                            <li class="nav-item">
+                                <a class="nav-link" href="/DonHang/QuanLy">
+                                    📋 Quản Lý Đơn
+                                </a>
+                            </li>
+                            @* Admin: Quản Lý Khách hiển thị riêng *@
+                            <li class="nav-item">
+                                <a class="nav-link" href="/Account/DanhSachKhach">
+                                    👥 Quản Lý Khách
+                                </a>
+                            </li>
+                        }
+                        else if (vaiTro == "KhachHang")
+                        {
+                            @* Khách: Menu dropdown chỉ có Menu & Đặt Hàng *@
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#"
+                                   data-bs-toggle="dropdown">
+                                    🍵 Menu
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a class="dropdown-item" href="/DonHang">
+                                            🛒 Menu & Đặt Hàng
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                            @* Khách: Giỏ Hàng hiển thị riêng *@
+                            <li class="nav-item">
+                                <a class="nav-link" href="/GioHang">
+                                    🧺 Giỏ Hàng
+                                    @if (soMonGio > 0)
+                                    {
+                                        <span class="badge bg-danger">
+                                            @soMonGio
+                                        </span>
+                                    }
+                                </a>
+                            </li>
+                            @* Khách: Đơn Của Tôi hiển thị riêng *@
+                            <li class="nav-item">
+                                <a class="nav-link" href="/DonHang/LichSu">
+                                    📦 Đơn Của Tôi
+                                </a>
+                            </li>
+                        }
+                        else
+                        {
+                            @* Chưa đăng nhập: Menu dropdown *@
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#"
+                                   data-bs-toggle="dropdown">
+                                    🍵 Menu
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a class="dropdown-item" href="/SanPham">
+                                            📋 Xem Menu
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="/DonHang">
+                                            🛒 Đặt Hàng
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                        }
+                    </ul>
+
+                    @* ── MENU PHẢI (Tài Khoản) ── *@
+                    <ul class="navbar-nav">
+                        @if (userName != null)
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#"
+                                   data-bs-toggle="dropdown"
+                                   style="color:#f0dba0 !important;font-weight:600">
+                                    👋 @userName
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    @if (vaiTro == "KhachHang")
+                                    {
+                                        <li>
+                                            <a class="dropdown-item"
+                                               href="/DonHang/LichSu">
+                                                📦 Đơn Hàng Của Tôi
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider"/></li>
+                                    }
+                                    <li>
+                                        <a class="dropdown-item"
+                                           href="/Account/Logout"
+                                           style="color:#e8b4b0 !important">
+                                            🚪 Đăng Xuất
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" href="/Account/Login">
+                                    🔑 Đăng Nhập
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/Account/Register">
+                                    👤 Đăng Ký
+                                </a>
+                            </li>
+                        }
+                    </ul>
+
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer>
+        <div class="container text-center">
+            <div>
+                🍵 <strong style="color:#f0dba0">Hồng Trà DQT</strong>
+            </div>
+            <div style="font-size:.85rem;margin-top:.3rem">
+                📍 0123 Đường Lý Thái Tổ, Quận 1, TP.HCM &nbsp;|&nbsp;
+                📞 0001 234 567 &nbsp;|&nbsp;
+                🕐 7:00 - 22:00
+            </div>
+            <div style="font-size:.78rem;margin-top:.3rem">
+                &copy; 2026 - Hồng Trà DQT
+            </div>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

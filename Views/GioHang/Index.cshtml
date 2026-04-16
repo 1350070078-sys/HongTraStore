@@ -1,0 +1,207 @@
+@model List<HongTraStore.Models.GioHangItem>
+@{ViewData["Title"] = "Giỏ Hàng";}
+
+<div class="container mt-4" style="max-width:750px">
+    <h2>🛒 Giỏ Hàng Của Bạn</h2>
+    <a href="/DonHang" class="btn btn-outline-secondary btn-sm mb-3">
+        ← Tiếp Tục Chọn Món
+    </a>
+
+    @if(TempData["Error"] != null){
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    @if(!Model.Any())
+    {
+        <div class="alert alert-info text-center py-4">
+            <div style="font-size:3rem">🛒</div>
+            <div>Giỏ hàng trống! Hãy chọn món bạn thích.</div>
+            <a href="/DonHang" class="btn btn-success mt-2">
+                Xem ngay Menu
+            </a>
+        </div>
+    }
+    else
+    {
+        @foreach(var item in Model){
+        <div class="card mb-2 shadow-sm">
+            <div class="card-body py-2">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>🍵 @item.TenSanPham</strong><br/>
+                        <small class="text-muted">
+                            Ghi chú: @(item.GhiChu ?? "Không có")
+                        </small>
+                    </div>
+                    <div class="text-end">
+                        <div class="text-danger fw-bold">
+                            @item.ThanhTien.ToString("N0") đ
+                        </div>
+                        <small class="text-muted">
+                            @item.Gia.ToString("N0") đ x @item.SoLuong
+                        </small>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 mt-2 align-items-center">
+                    @* Cập nhật số lượng *@
+                    <form method="post"
+                          action="/GioHang/CapNhatSoLuong"
+                          class="d-flex gap-1 align-items-center">
+                        <input type="hidden" name="sanPhamId"
+                               value="@item.SanPhamId"/>
+                        <label class="small">SL:</label>
+                        <input type="number" name="soLuong"
+                               class="form-control form-control-sm"
+                               style="width:70px"
+                               value="@item.SoLuong" min="1"/>
+                        <button type="submit"
+                                class="btn btn-outline-primary btn-sm">
+                            Cập Nhật
+                        </button>
+                    </form>
+
+                    @* Xóa món - dùng form POST thay vì href *@
+                    <form method="post"
+                          action="/GioHang/XoaKhoi"
+                          onsubmit="return confirm('Xóa món này?')">
+                        <input type="hidden" name="sanPhamId"
+                               value="@item.SanPhamId"/>
+                        <button type="submit"
+                                class="btn btn-outline-danger btn-sm">
+                            🗑 Xóa
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        }
+        <div class="card mt-3 border-0 shadow-sm"
+             style="background:#fdf6f0">
+            <div class="card-body">
+                <div class="d-flex justify-content-between fs-5 fw-bold mb-3">
+                    <span>Tổng Cộng:</span>
+                    <span class="text-danger">
+                        @Model.Sum(x => x.ThanhTien).ToString("N0") đ
+                    </span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">
+                        💳 Chọn Phương Thức Thanh Toán
+                    </label>
+                    <div class="d-flex gap-2">
+                        <button type="button"
+                                class="btn btn-outline-secondary flex-fill"
+                                id="btn-tienmat"
+                                onclick="chonTT('tienmat')">
+                            💵 Tiền Mặt
+                        </button>
+                        <button type="button"
+                                class="btn btn-outline-primary flex-fill"
+                                id="btn-chuyenkhoan"
+                                onclick="chonTT('chuyenkhoan')">
+                            🏦 Chuyển Khoản
+                        </button>
+                        <button type="button"
+                                class="btn btn-outline-danger flex-fill"
+                                id="btn-momo"
+                                onclick="chonTT('momo')">
+                            📱 MoMo
+                        </button>
+                    </div>
+                </div>
+
+                <div id="qr-section" style="display:none" class="text-center mb-3">
+                    <div id="box-tienmat" style="display:none">
+                        <div class="alert alert-success">
+                            💵 Vui lòng thanh toán
+                            <strong>tiền mặt tại quầy</strong>
+                            khi nhận hàng!
+                        </div>
+                    </div>
+                    <div id="box-chuyenkhoan" style="display:none">
+                        <p class="fw-bold mb-2">
+                            🏦 Quét QR để chuyển khoản
+                        </p>
+                        <img src="~/images/qr-payment.jpg"
+                             alt="QR Thanh Toán"
+                             style="max-width:220px;border-radius:12px;
+                                    box-shadow:0 4px 16px rgba(0,0,0,.15)"/>
+                        <div class="mt-3 text-start p-3"
+                             style="background:#fff;border-radius:10px;
+                                    border:1px solid #e8d5c8;
+                                    display:inline-block">
+                            <div>🏦 <strong>Ngân hàng:</strong> Vietcombank</div>
+                            <div>💳 <strong>STK:</strong> 1051870839</div>
+                            <div>👤 <strong>Tên:</strong> DQT TEA</div>
+                            <div>💰 <strong>Số tiền:</strong>
+                                <span class="text-danger fw-bold">
+                                    @Model.Sum(x => x.ThanhTien).ToString("N0") đ
+                                </span>
+                            </div>
+                            <div>📝 <strong>Nội dung:</strong> Thanh Toán </div>
+                        </div>
+                    </div>
+                    <div id="box-momo" style="display:none">
+                        <p class="fw-bold mb-2">
+                            📱 Quét QR MoMo để thanh toán
+                        </p>
+                        <img src="~/images/qr-payment.jpg"
+                             alt="QR MoMo"
+                             style="max-width:220px;border-radius:12px;
+                                    box-shadow:0 4px 16px rgba(0,0,0,.15)"/>
+                        <div class="mt-3">
+                            <div>📱 <strong>SĐT MoMo:</strong> 1051870839</div>
+                            <div>👤 <strong>Tên:</strong> DQT TEA</div>
+                            <div>💰 <strong>Số tiền:</strong>
+                                <span class="text-danger fw-bold">
+                                    @Model.Sum(x => x.ThanhTien).ToString("N0") đ
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <form method="post" action="/GioHang/DatHangTuGio">
+                    <button type="submit"
+                            id="btn-dathang"
+                            class="btn btn-success w-100 py-2 fs-5"
+                            disabled>
+                        ✅ Xác Nhận Đặt Hàng (@Model.Count món)
+                    </button>
+                </form>
+                <div class="text-muted small text-center mt-1">
+                    ⚠️ Vui lòng chọn phương thức thanh toán để tiếp tục
+                </div>
+            </div>
+        </div>
+    }
+</div>
+@section Scripts {
+<script>
+    function chonTT(loai) {
+        document.getElementById('btn-tienmat').className =
+            'btn btn-outline-secondary flex-fill';
+        document.getElementById('btn-chuyenkhoan').className =
+            'btn btn-outline-primary flex-fill';
+        document.getElementById('btn-momo').className =
+            'btn btn-outline-danger flex-fill';
+        document.getElementById('box-tienmat').style.display = 'none';
+        document.getElementById('box-chuyenkhoan').style.display = 'none';
+        document.getElementById('box-momo').style.display = 'none';
+        document.getElementById('qr-section').style.display = 'block';
+        document.getElementById('box-' + loai).style.display = 'block';
+        if (loai === 'tienmat')
+            document.getElementById('btn-tienmat').className =
+                'btn btn-success flex-fill';
+        else if (loai === 'chuyenkhoan')
+            document.getElementById('btn-chuyenkhoan').className =
+                'btn btn-primary flex-fill';
+        else
+            document.getElementById('btn-momo').className =
+                'btn btn-danger flex-fill';
+        document.getElementById('btn-dathang').disabled = false;
+    }
+</script>
+}

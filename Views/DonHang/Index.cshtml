@@ -1,0 +1,103 @@
+@model List<HongTraStore.Models.SanPham>
+@{ViewData["Title"] = "Menu & Đặt Hàng";}
+
+<div class="container mt-4">
+    <h2>🛒 Menu & Đặt Hàng</h2>
+
+    @if(TempData["Error"] != null){
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+    @if(TempData["Success"] != null){
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+    @if(Context.Session.GetInt32("UserId") == null){
+        <div class="alert alert-warning">
+            Vui lòng <a href="/Account/Login">đăng nhập</a>
+            để đặt hàng!
+        </div>
+    }
+
+    <div class="d-flex justify-content-end mb-3">
+        <a href="/GioHang" class="btn btn-warning">
+            🧺 Xem Giỏ Hàng
+            @{
+                var gioJson = Context.Session.GetString("GioHang");
+                int soMon = 0;
+                if (!string.IsNullOrEmpty(gioJson)){
+                    var gio = System.Text.Json.JsonSerializer
+                        .Deserialize<List<HongTraStore.Models.GioHangItem>>(gioJson);
+                    soMon = gio?.Count ?? 0;
+                }
+            }
+            @if(soMon > 0){
+                <span class="badge bg-danger">@soMon</span>
+            }
+        </a>
+    </div>
+
+    <div class="row">
+        @foreach(var sp in Model){
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                @* PHẦN ẢNH SẢN PHẨM *@
+                @if (!string.IsNullOrEmpty(sp.HinhAnh))
+                {
+                    <img src="@sp.HinhAnh"
+                         alt="@sp.TenSanPham"
+                         class="card-img-top"
+                         style="height:220px;object-fit:contain;background:#fdf0e8;padding:8px;border-radius:8px 8px 0 0"
+                         onerror="this.src='https://via.placeholder.com/400x200?text=No+Image'"/>
+                }
+                else
+                {
+                    <div style="height:200px;background:linear-gradient(135deg,#fdf0e8,#f5e0d0);
+                                display:flex;align-items:center;justify-content:center;
+                                font-size:4rem;border-radius:8px 8px 0 0">
+                        🍵
+                    </div>
+                }
+
+                <div class="card-body">
+                    <span class="badge bg-secondary mb-1">
+                        @sp.DanhMuc
+                    </span>
+                    <h5 class="card-title">@sp.TenSanPham</h5>
+                    <p class="fw-bold text-danger fs-5">
+                        @sp.Gia.ToString("N0") đ
+                    </p>
+                    <p class="small text-success">
+                        Còn: @sp.SoLuongTon ly
+                    </p>
+                    <p class="small text-muted">@sp.MoTa</p>
+                    <hr/>
+                    <form method="post" action="/GioHang/ThemVaoGio">
+                        <input type="hidden" name="sanPhamId"
+                               value="@sp.Id"/>
+                        <div class="mb-2">
+                            <label class="form-label small fw-bold">
+                                Số Lượng
+                            </label>
+                            <input type="number" name="soLuong"
+                                   class="form-control form-control-sm"
+                                   value="1" min="1"
+                                   max="@sp.SoLuongTon"/>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label small fw-bold">
+                                Ghi Chú
+                            </label>
+                            <input type="text" name="ghiChu"
+                                   class="form-control form-control-sm"
+                                   placeholder="Ít đường, nhiều đá..."/>
+                        </div>
+                        <button type="submit"
+                                class="btn btn-success w-100">
+                            🛒 Thêm Vào Giỏ
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        }
+    </div>
+</div>

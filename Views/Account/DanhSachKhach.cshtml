@@ -1,0 +1,49 @@
+@model List<HongTraStore.Models.KhachHang>
+@{ViewData["Title"] = "Quản Lý Khách Hàng";}
+
+<div class="container mt-4">
+    <h2>👥 Quản Lý Khách Hàng</h2>
+
+    @if(TempData["Success"] != null){
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
+    <table class="table table-bordered table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Họ Tên</th>
+                <th>Email</th>
+                <th>Mật Khẩu</th>
+                <th>Điện Thoại</th>
+                <th>Ngày Tạo</th>
+                <th>Thao Tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach(var kh in Model){
+            <tr>
+                <td>@kh.Id</td>
+                <td><strong>@kh.HoTen</strong></td>
+                <td>@kh.Email</td>
+                <td>
+                    <span class="badge bg-secondary">@kh.MatKhau</span>
+                </td>
+                <td>@kh.SoDienThoai</td>
+                <td style="font-size:.8rem">
+                    @kh.NgayTao.ToString("dd/MM/yyyy")
+                </td>
+                <td>
+                    <a href="/Account/SuaKhach/@kh.Id"
+                       class="btn btn-primary btn-sm">✏️ Sửa</a>
+                    <a href="/Account/XoaKhach/@kh.Id"
+                       class="btn btn-danger btn-sm"
+                       onclick="return confirm('Xóa khách hàng này?')">
+                       🗑 Xóa
+                    </a>
+                </td>
+            </tr>
+            }
+        </tbody>
+    </table>
+</div>

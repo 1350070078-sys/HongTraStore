@@ -1,0 +1,52 @@
+@model HongTraStore.Models.SanPham
+@{ViewData["Title"] = "Thêm Sản Phẩm";}
+
+<div class="container mt-4" style="max-width:600px">
+    <h2>➕ Thêm Sản Phẩm Mới</h2>
+    <hr/>
+
+    <form method="post" action="/SanPham/Create">
+        <div class="mb-3">
+            <label class="form-label">Tên Sản Phẩm</label>
+            <input asp-for="TenSanPham" class="form-control" 
+                   placeholder="VD: Hồng Trà Sữa Classic" required/>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Danh Mục</label>
+            <select asp-for="DanhMuc" class="form-control">
+                <option value="Hồng Trà">Hồng Trà</option>
+                <option value="Đặc Biệt">Đặc Biệt</option>
+                <option value="Trái Cây">Trái Cây</option>
+                <option value="Trà Sữa">Trà Sữa</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Giá Bán (VNĐ)</label>
+            <input asp-for="Gia" class="form-control" 
+                   type="number" placeholder="VD: 45000"/>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Số Lượng Tồn Kho</label>
+            <input asp-for="SoLuongTon" class="form-control" 
+                   type="number" placeholder="VD: 100"/>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Mô Tả</label>
+            <textarea asp-for="MoTa" class="form-control" rows="3"
+                      placeholder="Mô tả ngắn về sản phẩm..."></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Hình Ảnh (emoji hoặc tên file)</label>
+            <input asp-for="HinhAnh" class="form-control" 
+                   placeholder="VD: 🍵 hoặc tra-sua.jpg"/>
+        </div>
+
+        <button type="submit" class="btn btn-success">💾 Lưu Sản Phẩm</button>
+        <a href="/SanPham" class="btn btn-secondary ms-2">← Quay Lại</a>
+    </form>
+</div>

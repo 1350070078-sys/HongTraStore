@@ -1,0 +1,118 @@
+@model List<HongTraStore.Models.SanPham>
+@{
+    ViewData["Title"] = "Menu";
+    var vaiTro = Context.Session.GetString("VaiTro");
+    var isAdmin = vaiTro == "Admin";
+    var isKhach = vaiTro == "KhachHang";
+}
+
+<div class="container mt-4">
+    <h2>🍵 Menu Hồng Trà DQT</h2>
+
+    @if (isAdmin)
+    {
+        <a href="/SanPham/Create" class="btn btn-success mb-3">
+            + Thêm Sản Phẩm
+        </a>
+    }
+
+    <table class="table table-bordered table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Tên Sản Phẩm</th>
+                <th>Danh Mục</th>
+                <th>Giá</th>
+                <th>Tồn Kho</th>
+                <th>Mô Tả</th>
+                @if (isKhach)
+                {
+                    <th>Đặt Hàng</th>
+                }
+                @if (isAdmin)
+                {
+                    <th>Thao Tác</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var sp in Model)
+            {
+                <tr>
+                    <td><strong>@sp.TenSanPham</strong></td>
+                    <td>@sp.DanhMuc</td>
+                    <td style="color:#c0392b;font-weight:700">
+                        @sp.Gia.ToString("N0") đ
+                    </td>
+                    <td>
+                        @if (sp.SoLuongTon == 0)
+                        {
+                            <span class="badge bg-danger">Hết hàng</span>
+                        }
+                        else if (sp.SoLuongTon <= 10)
+                        {
+                            <span class="badge bg-warning text-dark">
+                                Sắp hết (@sp.SoLuongTon)
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success">@sp.SoLuongTon</span>
+                        }
+                    </td>
+                    <td>@sp.MoTa</td>
+                    @if (isKhach)
+                    {
+                        <td>
+                            @if (sp.SoLuongTon > 0)
+                            {
+                                <form method="post" action="/GioHang/ThemVaoGio"
+                                      class="d-flex gap-1 align-items-center">
+                                    <input type="hidden" name="sanPhamId"
+                                           value="@sp.Id"/>
+                                    <input type="number" name="soLuong"
+                                           value="1" min="1"
+                                           max="@sp.SoLuongTon"
+                                           class="form-control form-control-sm"
+                                           style="width:60px"/>
+                                    <button type="submit"
+                                            class="btn btn-success btn-sm">
+                                        + Giỏ
+                                    </button>
+                                </form>
+                            }
+                            else
+                            {
+                                <span class="text-muted small">Hết hàng</span>
+                            }
+                        </td>
+                    }
+
+                    @if (isAdmin)
+                    {
+                        <td>
+                            <a href="/SanPham/Edit/@sp.Id"
+                               class="btn btn-primary btn-sm">✏️ Sửa</a>
+                            <a href="/SanPham/Delete/@sp.Id"
+                               class="btn btn-danger btn-sm"
+                               onclick="return confirm('Xác nhận xóa?')">
+                               🗑 Xóa
+                            </a>
+                        </td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    @if (isKhach)
+    {
+        <div class="d-flex gap-2 mt-2">
+            <a href="/GioHang" class="btn btn-warning">
+                🧺 Xem Giỏ Hàng
+            </a>
+            <a href="/DonHang" class="btn btn-outline-success">
+                🛒 Chọn Món Kiểu Khác
+            </a>
+        </div>
+    }
+</div>

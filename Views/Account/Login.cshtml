@@ -1,0 +1,22 @@
+@{ViewData["Title"] = "Đăng Nhập";}
+<div class="container mt-4" style="max-width:450px">
+    <h2>🔑 Đăng Nhập</h2>
+    <hr/>
+    @if(ViewBag.Error != null){
+        <div class="alert alert-danger">@ViewBag.Error</div>
+    }
+    <form method="post">
+        <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input name="email" type="email" class="form-control" required/>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Mật Khẩu</label>
+            <input name="matkhau" type="password" class="form-control" required/>
+        </div>
+        <button type="submit" class="btn btn-success w-100">Đăng Nhập</button>
+        <a href="/Account/Register" class="btn btn-outline-secondary w-100 mt-2">
+            Chưa có tài khoản? Đăng Ký
+        </a>
+    </form>
+</div>

@@ -1,0 +1,139 @@
+@model List<HongTraStore.Models.DonHang>
+@{
+    ViewData["Title"] = "Đơn Hàng Của Tôi";
+    var nhomDon = Model.GroupBy(d => d.MaDonHang)
+                       .OrderByDescending(g => g.First().NgayDat);
+}
+
+<div class="container mt-4">
+    <h2>📦 Đơn Hàng Của Tôi</h2>
+    <a href="/DonHang" class="btn btn-success mb-3">+ Đặt Thêm</a>
+
+    @if(TempData["Success"] != null){
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info text-center py-4">
+            <div style="font-size:2.5rem">📭</div>
+            Bạn chưa có đơn hàng nào!
+            <br/>
+            <a href="/DonHang" class="btn btn-success mt-2">
+                Đặt Hàng Ngay
+            </a>
+        </div>
+    }
+    @foreach (var nhom in nhomDon)
+    {
+        var donDauTien = nhom.First();
+        var tongTien = nhom.Sum(d => (d.SanPham?.Gia ?? 0) * d.SoLuong);
+
+        <div class="card mb-4 shadow-sm">
+
+            @* Header đơn hàng *@
+            <div class="card-header d-flex justify-content-between align-items-center"
+                 style="background:#fdf0e8;border-bottom:1px solid #e8d5c8">
+                <div>
+                    <strong style="color:#2d1a0e">
+                        🧾 Mã ĐH: @nhom.Key
+                    </strong>
+                    <div class="text-muted small">
+                        🕐 @donDauTien.NgayDat.ToString("dd/MM/yyyy HH:mm")
+                    </div>
+                </div>
+                <div class="text-end d-flex flex-column gap-1">
+                    @* Trạng thái đơn *@
+                    @if (donDauTien.TrangThai == "Hoàn thành")
+                    {
+                        <span class="badge bg-success">✅ @donDauTien.TrangThai</span>
+                    }
+                    else if (donDauTien.TrangThai == "Đã hủy")
+                    {
+                        <span class="badge bg-danger">❌ @donDauTien.TrangThai</span>
+                    }
+                    else if (donDauTien.TrangThai == "Đang pha chế")
+                    {
+                        <span class="badge bg-info">☕ @donDauTien.TrangThai</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-warning text-dark">
+                            ⏳ @donDauTien.TrangThai
+                        </span>
+                    }
+
+                    @* Trạng thái thanh toán *@
+                    @if (donDauTien.TrangThaiThanhToan == "Đã thanh toán")
+                    {
+                        <span class="badge bg-success">💰 Đã thanh toán</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger">💸 Chưa thanh toán</span>
+                    }
+                </div>
+            </div>
+            @* Danh sách món *@
+            <div class="card-body p-0">
+                <table class="table table-borderless mb-0">
+                    <thead style="background:#faf3ec">
+                        <tr>
+                            <th class="ps-3">Sản Phẩm</th>
+                            <th>Số Lượng</th>
+                            <th>Ghi Chú</th>
+                            <th class="text-end pe-3">Thành Tiền</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var d in nhom)
+                        {
+                            <tr>
+                                <td class="ps-3">🍵 @d.SanPham?.TenSanPham</td>
+                                <td>@d.SoLuong ly</td>
+                                <td>@(d.GhiChu ?? "-")</td>
+                                <td class="text-end pe-3 text-danger fw-bold">
+                                    @((d.SanPham?.Gia * d.SoLuong ?? 0).ToString("N0")) đ
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @* Footer đơn hàng *@
+            <div class="card-footer d-flex justify-content-between align-items-center"
+                 style="background:#fdf0e8">
+                <div>
+                    @if (donDauTien.TrangThai == "Chờ xử lý")
+                    {
+                        <form method="post" action="/DonHang/HuyDonNhom"
+                              style="display:inline">
+                            <input type="hidden" name="maDonHang"
+                                   value="@nhom.Key"/>
+                            <button type="submit"
+                                    class="btn btn-outline-danger btn-sm"
+                                    onclick="return confirm('Hủy toàn bộ đơn này?')">
+                                ❌ Hủy Đơn
+                            </button>
+                        </form>
+                    }
+                    @if (donDauTien.TrangThaiThanhToan != "Đã thanh toán"
+                         && donDauTien.TrangThai != "Đã hủy")
+                    {
+                        <a href="/GioHang" class="btn btn-warning btn-sm ms-2">
+                            💳 Thanh Toán Ngay
+                        </a>
+                    }
+                </div>
+                <div class="fw-bold fs-5">
+                    Tổng:
+                    <span style="color:#c0392b">
+                        @tongTien.ToString("N0") đ
+                    </span>
+                </div>
+            </div>
+
+        </div>
+    }
+</div>

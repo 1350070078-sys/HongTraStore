@@ -1,136 +1,136 @@
 @model List<HongTraStore.Models.DonHang>
-@{ViewData["Title"] = "Quản Lý Đơn Hàng";}
+@{
+    ViewData["Title"] = "Quản Lý Đơn Hàng";
+    var nhomDon = Model.GroupBy(d => d.MaDonHang)
+                       .OrderByDescending(g => g.First().NgayDat);
+}
 
 <div class="container mt-4">
     <h2>📋 Quản Lý Đơn Hàng (Admin)</h2>
 
-    <table class="table table-bordered table-hover"
-           style="font-size:.85rem">
-        <thead class="table-dark">
-            <tr>
-                <th>Mã ĐH</th>
-                <th>Khách Hàng</th>
-                <th>Sản Phẩm</th>
-                <th>SL</th>
-                <th>Ghi Chú</th>
-                <th>Ngày Đặt</th>
-                <th>Trạng Thái Đơn</th>
-                <th>Thanh Toán</th>
-                <th>Số Tiền</th>
-                <th>Thời Gian TT</th>
-                <th>Cập Nhật</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var d in Model)
-            {
-            <tr>
-                <td>
-                    <strong>#@d.Id</strong><br/>
-                    <small class="text-muted">@d.MaDonHang</small>
-                </td>
-                <td>
-                    @d.KhachHang?.HoTen<br/>
-                    <small class="text-muted">
-                        @d.KhachHang?.SoDienThoai
-                    </small>
-                </td>
-                <td>@d.SanPham?.TenSanPham</td>
-                <td>@d.SoLuong</td>
-                <td>@(d.GhiChu ?? "-")</td>
-                <td style="font-size:.78rem">
-                    @d.NgayDat.ToString("dd/MM/yyyy HH:mm")
-                </td>
-                <td>
-                    @if (d.TrangThai == "Hoàn thành")
+    @foreach (var nhom in nhomDon)
+    {
+        var donDau = nhom.First();
+        var tongTien = nhom.Sum(d => d.SoTienThanhToan);
+
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center"
+                 style="background:#3d2515;color:#f0dba0">
+                <div>
+                    <strong>🧾 Mã ĐH: @nhom.Key</strong>
+                    <div style="font-size:.8rem;opacity:.8">
+                        👤 @donDau.KhachHang?.HoTen
+                        — 📞 @donDau.KhachHang?.SoDienThoai
+                        — 🕐 @donDau.NgayDat.ToString("dd/MM/yyyy HH:mm")
+                    </div>
+                </div>
+                <div class="text-end">
+                    @if (donDau.TrangThai == "Hoàn thành")
                     {
-                        <span class="badge bg-success">
-                            ✅ @d.TrangThai
-                        </span>
+                        <span class="badge bg-success">✅ @donDau.TrangThai</span>
                     }
-                    else if (d.TrangThai == "Đã hủy")
+                    else if (donDau.TrangThai == "Đã hủy")
                     {
-                        <span class="badge bg-danger">
-                            ❌ @d.TrangThai
-                        </span>
+                        <span class="badge bg-danger">❌ @donDau.TrangThai</span>
                     }
-                    else if (d.TrangThai == "Đang pha chế")
+                    else if (donDau.TrangThai == "Đang pha chế")
                     {
-                        <span class="badge bg-info">
-                            ☕ @d.TrangThai
-                        </span>
+                        <span class="badge bg-info">☕ @donDau.TrangThai</span>
                     }
                     else
                     {
-                        <span class="badge bg-warning text-dark">
-                            ⏳ @d.TrangThai
-                        </span>
+                        <span class="badge bg-warning text-dark">⏳ @donDau.TrangThai</span>
                     }
-                </td>
-                <td>
-                    @if (d.TrangThaiThanhToan == "Đã thanh toán")
+                    &nbsp;
+                    @if (donDau.TrangThaiThanhToan == "Đã thanh toán")
                     {
-                        <span class="badge bg-success">✅ Đã TT</span>
+                        <span class="badge bg-success">💰 Đã TT</span>
                     }
                     else
                     {
-                        <span class="badge bg-danger">❌ Chưa TT</span>
+                        <span class="badge bg-danger">💸 Chưa TT</span>
                     }
-                </td>
-                <td style="color:#c0392b;font-weight:700">
-                    @d.SoTienThanhToan.ToString("N0") đ
-                </td>
-                <td style="font-size:.78rem">
-                    @(d.ThoiGianThanhToan.HasValue
-                        ? d.ThoiGianThanhToan.Value
-                            .ToString("dd/MM/yyyy HH:mm")
-                        : "-")
-                </td>
-                <td>
-                    <form method="post"
-                          action="/DonHang/CapNhatTrangThai">
-                        <input type="hidden" name="id"
-                               value="@d.Id"/>
-                        <select name="trangThai"
-                                class="form-select form-select-sm mb-1">
-                            <option value="Chờ xử lý"
-                                selected="@(d.TrangThai=="Chờ xử lý")">
-                                ⏳ Chờ xử lý
-                            </option>
-                            <option value="Đang pha chế"
-                                selected="@(d.TrangThai=="Đang pha chế")">
-                                ☕ Đang pha chế
-                            </option>
-                            <option value="Hoàn thành"
-                                selected="@(d.TrangThai=="Hoàn thành")">
-                                ✅ Hoàn thành
-                            </option>
-                            <option value="Đã hủy"
-                                selected="@(d.TrangThai=="Đã hủy")">
-                                ❌ Đã hủy
-                            </option>
-                        </select>
-                        <select name="thanhToan"
-                                class="form-select form-select-sm mb-1">
-                            <option value="Chưa thanh toán"
-                                selected="@(d.TrangThaiThanhToan
-                                    =="Chưa thanh toán")">
-                                ❌ Chưa thanh toán
-                            </option>
-                            <option value="Đã thanh toán"
-                                selected="@(d.TrangThaiThanhToan
-                                    =="Đã thanh toán")">
-                                ✅ Đã thanh toán
-                            </option>
-                        </select>
-                        <button type="submit"
-                                class="btn btn-primary btn-sm w-100">
-                            💾 Lưu
-                        </button>
-                    </form>
-                </td>
-            </tr>
-            }
-        </tbody>
-    </table>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-borderless mb-0"
+                       style="font-size:.88rem">
+                    <thead style="background:#faf3ec">
+                        <tr>
+                            <th class="ps-3">Sản Phẩm</th>
+                            <th>Số Lượng</th>
+                            <th>Ghi Chú</th>
+                            <th class="text-end">Thành Tiền</th>
+                            <th class="text-end pe-3">Thời Gian TT</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var d in nhom)
+                        {
+                            <tr>
+                                <td class="ps-3">🍵 @d.SanPham?.TenSanPham</td>
+                                <td>@d.SoLuong ly</td>
+                                <td>@(d.GhiChu ?? "-")</td>
+                                <td class="text-end text-danger fw-bold">
+                                    @d.SoTienThanhToan.ToString("N0") đ
+                                </td>
+                                <td class="text-end pe-3" style="font-size:.78rem">
+                                    @(d.ThoiGianThanhToan.HasValue
+                                        ? d.ThoiGianThanhToan.Value.ToString("dd/MM/yyyy HH:mm")
+                                        : "-")
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer d-flex justify-content-between align-items-center"
+                 style="background:#fdf0e8">
+                <div class="fw-bold fs-5">
+                    Tổng: <span style="color:#c0392b">
+                        @tongTien.ToString("N0") đ
+                    </span>
+                </div>
+                <form method="post" action="/DonHang/CapNhatTrangThai"
+                      class="d-flex gap-2 align-items-center">
+                    <input type="hidden" name="id" value="@donDau.Id"/>
+                    <select name="trangThai"
+                            class="form-select form-select-sm"
+                            style="width:160px">
+                        <option value="Chờ xử lý"
+                            selected="@(donDau.TrangThai=="Chờ xử lý")">
+                            ⏳ Chờ xử lý
+                        </option>
+                        <option value="Đang pha chế"
+                            selected="@(donDau.TrangThai=="Đang pha chế")">
+                            ☕ Đang pha chế
+                        </option>
+                        <option value="Hoàn thành"
+                            selected="@(donDau.TrangThai=="Hoàn thành")">
+                            ✅ Hoàn thành
+                        </option>
+                        <option value="Đã hủy"
+                            selected="@(donDau.TrangThai=="Đã hủy")">
+                            ❌ Đã hủy
+                        </option>
+                    </select>
+                    <select name="thanhToan"
+                            class="form-select form-select-sm"
+                            style="width:180px">
+                        <option value="Chưa thanh toán"
+                            selected="@(donDau.TrangThaiThanhToan=="Chưa thanh toán")">
+                            💸 Chưa thanh toán
+                        </option>
+                        <option value="Đã thanh toán"
+                            selected="@(donDau.TrangThaiThanhToan=="Đã thanh toán")">
+                            💰 Đã thanh toán
+                        </option>
+                    </select>
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        💾 Lưu
+                    </button>
+                </form>
+            </div>
+        </div>
+    }
 </div>

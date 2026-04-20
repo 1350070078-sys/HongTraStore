@@ -5,7 +5,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite("Data Source=HongTraStore.db"));
+    options.UseSqlite("Data Source=/app/data/HongTraStore.db"));
 
 // Thêm Session
 builder.Services.AddSession(options =>
